@@ -14,9 +14,10 @@ from .power_paint.power_paint import PowerPaint
 from .sd import SD15, SD2, Anything4, RealisticVision14, SD
 from .sdxl import SDXL
 from .zits import ZITS
-
+from .lama_manga import LaMaManga
 models = {
     LaMa.name: LaMa,
+    LaMaManga.name: LaMaManga,
     LDM.name: LDM,
     ZITS.name: ZITS,
     MAT.name: MAT,
