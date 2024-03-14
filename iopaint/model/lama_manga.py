@@ -8,7 +8,7 @@ from iopaint.helper import (
     norm_img,
     get_cache_path_by_url,
     load_jit_model,
-#    download_model,
+    download_model,
 )
 from iopaint.schema import InpaintRequest,Config
 from .base import InpaintModel
@@ -35,8 +35,12 @@ class LaMaManga(InpaintModel):
     pad_mod = 8
     is_erase_model = True
 
+    @staticmethod
+    def download():
+        download_model(LAMA_MODEL_URL, LAMA_MODEL_MD5)
+
     def init_model(self, device, **kwargs):
-        self.model = load_lama_model(model_path='/home/opc/.cache/torch/hub/checkpoints/lama_large_512px.ckpt', device=device, large_arch=True)
+        self.model = load_lama_model(LAMA_MODEL_URL, device=device, model_md5=LAMA_MODEL_MD5, large_arch=True)
         #self.model = load_jit_model(LAMA_MODEL_URL, device, LAMA_MODEL_MD5).eval()
 
     @staticmethod
@@ -353,7 +357,11 @@ class LamaFourier:
 
         return rel_pos, abs_pos, direct
 
-def load_lama_model(model_path, device, large_arch: bool = False) -> LamaFourier:
+def load_lama_model(url_or_path, device, model_md5, large_arch: bool = False) -> LamaFourier:
+    if os.path.exists(url_or_path):
+        model_path = url_or_path
+    else:
+        model_path = download_model(url_or_path,model_md5)
     model = LamaFourier(large_arch=large_arch)
     sd = torch.load(model_path, map_location = 'cpu')
     model.generator.load_state_dict(sd['gen_state_dict'])
