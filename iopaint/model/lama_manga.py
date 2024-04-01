@@ -12,6 +12,10 @@ from iopaint.helper import (
 )
 from iopaint.schema import InpaintRequest,Config
 from .base import InpaintModel
+from loguru import logger
+from PIL import Image
+from iopaint.helper import pil_to_bytes
+import cv2
 
 import torch.nn as nn
 from torch import Tensor
@@ -63,7 +67,9 @@ class LaMaManga(InpaintModel):
         inpainted_image = self.model(image, mask)
 
         cur_res = inpainted_image[0].permute(1, 2, 0).detach().cpu().numpy()
-        cur_res = np.clip(cur_res * 255, 0, 255).astype("uint8")
+        cur_res = np.clip((cur_res * 255)+3, 0, 255).astype("uint8")
+#        cur_res = cur_res + 3
+#        ur_res = np.clip(cur_res * 255, 0, 255).astype("uint8")
         cur_res = cv2.cvtColor(cur_res, cv2.COLOR_RGB2BGR)
         return cur_res
 
@@ -282,7 +288,18 @@ class LamaFourier:
         rel_pos, direct = None, None
         predicted_img = self.generator(img, mask, rel_pos, direct)
 
+        cur_res = predicted_img[0].permute(1, 2, 0).detach().cpu().numpy()
+        cur_res = np.clip(cur_res * 255, 0, 255).astype("uint8")
+
+#        inpaint_result = cv2.cvtColor(predicted_img, cv2.COLOR_BGR2RGB)
+
+        img_bytes = pil_to_bytes(Image.fromarray(cur_res), "png", 100)
+        save_p = f"result.png"
+        with open(save_p, "wb") as fw:
+            fw.write(img_bytes)
         if self.inpaint_only:
+            logger.info(f"inpaint only.")
+            #return predicted_img
             return predicted_img * mask + (1 - mask) * img
 
 
