@@ -51,7 +51,7 @@ class LaMaManga(InpaintModel):
     def is_downloaded() -> bool:
         return os.path.exists(get_cache_path_by_url(LAMA_MODEL_URL))
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input image and output image have same size
         image: [H, W, C] RGB
         mask: [H, W]
@@ -67,7 +67,7 @@ class LaMaManga(InpaintModel):
         inpainted_image = self.model(image, mask)
 
         cur_res = inpainted_image[0].permute(1, 2, 0).detach().cpu().numpy()
-        cur_res = np.clip((cur_res * 255)+3, 0, 255).astype("uint8")
+        cur_res = np.clip((cur_res * 259), 0, 255).astype("uint8")
 #        cur_res = cur_res + 3
 #        ur_res = np.clip(cur_res * 255, 0, 255).astype("uint8")
         cur_res = cv2.cvtColor(cur_res, cv2.COLOR_RGB2BGR)
@@ -293,12 +293,12 @@ class LamaFourier:
 
 #        inpaint_result = cv2.cvtColor(predicted_img, cv2.COLOR_BGR2RGB)
 
-        img_bytes = pil_to_bytes(Image.fromarray(cur_res), "png", 100)
-        save_p = f"result.png"
-        with open(save_p, "wb") as fw:
-            fw.write(img_bytes)
+#        img_bytes = pil_to_bytes(Image.fromarray(cur_res), "png", 100)
+#        save_p = f"result.png"
+#        with open(save_p, "wb") as fw:
+#            fw.write(img_bytes)
         if self.inpaint_only:
-            logger.info(f"inpaint only.")
+#            logger.info(f"inpaint only.")
             #return predicted_img
             return predicted_img * mask + (1 - mask) * img
 
