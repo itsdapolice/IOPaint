@@ -1,4 +1,5 @@
-from .basemodel import TextDetBase, TextDetBaseDNN
+#from .basemodel import TextDetBase, TextDetBaseDNN
+from .basemodel import TextDetBaseDNN
 from .utils.yolov5_utils import non_max_suppression
 from .utils.db_utils import SegDetectorRepresenter
 from .utils.imgproc_utils import letterbox
