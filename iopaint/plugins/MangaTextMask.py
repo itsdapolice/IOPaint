@@ -16,7 +16,8 @@ from typing import Union, Tuple
 import cv2
 import torch
 
-from .ctd_utils.basemodel import TextDetBase, TextDetBaseDNN
+#from .ctd_utils.basemodel import TextDetBase, TextDetBaseDNN
+from .ctd_utils.basemodel import TextDetBaseDNN
 from .ctd_utils.utils.yolov5_utils import non_max_suppression
 from .ctd_utils.utils.db_utils import SegDetectorRepresenter
 from .ctd_utils.utils.imgproc_utils import letterbox
