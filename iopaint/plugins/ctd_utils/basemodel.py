@@ -5,152 +5,152 @@ import torch.nn as nn
 
 #from .utils.weight_init import init_weights
 #from .yolov5.yolo import load_yolov5_ckpt
-from .yolov5.common import C3, Conv
+#from .yolov5.common import C3, Conv
 
 TEXTDET_MASK = 0
 TEXTDET_DET = 1
 TEXTDET_INFERENCE = 2
 
-class double_conv_up_c3(nn.Module):
-    def __init__(self, in_ch, mid_ch, out_ch, act=True):
-        super(double_conv_up_c3, self).__init__()
-        self.conv = nn.Sequential(
-        C3(in_ch+mid_ch, mid_ch, act=act),
-        nn.ConvTranspose2d(mid_ch, out_ch, kernel_size=4, stride = 2, padding=1, bias=False),
-        nn.BatchNorm2d(out_ch),
-        nn.ReLU(inplace=True),
-        )
+#class double_conv_up_c3(nn.Module):
+#    def __init__(self, in_ch, mid_ch, out_ch, act=True):
+#        super(double_conv_up_c3, self).__init__()
+#        self.conv = nn.Sequential(
+#        C3(in_ch+mid_ch, mid_ch, act=act),
+#        nn.ConvTranspose2d(mid_ch, out_ch, kernel_size=4, stride = 2, padding=1, bias=False),
+#        nn.BatchNorm2d(out_ch),
+#        nn.ReLU(inplace=True),
+#        )
+#
+#    def forward(self, x):
+#        return self.conv(x)
+#
+#class double_conv_c3(nn.Module):
+#    def __init__(self, in_ch, out_ch, stride=1, act=True):
+#        super(double_conv_c3, self).__init__()
+#        if stride > 1:
+#            self.down = nn.AvgPool2d(2,stride=2) if stride > 1 else None
+#        self.conv = C3(in_ch, out_ch, act=act)
+#
+#    def forward(self, x):
+#        if self.down is not None:
+#            x = self.down(x)
+#        x = self.conv(x)
+#        return x
+#
+#class UnetHead(nn.Module):
+#    def __init__(self, act=True) -> None:
+#
+#        super(UnetHead, self).__init__()
+#        self.down_conv1 = double_conv_c3(512, 512, 2, act=act)
+#        self.upconv0 = double_conv_up_c3(0, 512, 256, act=act)
+#        self.upconv2 = double_conv_up_c3(256, 512, 256, act=act)
+#        self.upconv3 = double_conv_up_c3(0, 512, 256, act=act)
+#        self.upconv4 = double_conv_up_c3(128, 256, 128, act=act)
+#        self.upconv5 = double_conv_up_c3(64, 128, 64, act=act)
+#        self.upconv6 = nn.Sequential(
+#            nn.ConvTranspose2d(64, 1, kernel_size=4, stride = 2, padding=1, bias=False),
+#            nn.Sigmoid()
+#        )
+#
+#    def forward(self, f160, f80, f40, f20, f3, forward_mode=TEXTDET_MASK):
+#        # input: 640@3
+#        d10 = self.down_conv1(f3) # 512@10
+#        u20 = self.upconv0(d10)  # 256@10
+#        u40 = self.upconv2(torch.cat([f20, u20], dim = 1)) # 256@40
+#
+#        if forward_mode == TEXTDET_DET:
+#            return f80, f40, u40
+#        else:
+#            u80 = self.upconv3(torch.cat([f40, u40], dim = 1)) # 256@80
+#            u160 = self.upconv4(torch.cat([f80, u80], dim = 1)) # 128@160
+#            u320 = self.upconv5(torch.cat([f160, u160], dim = 1)) # 64@320
+#            mask = self.upconv6(u320)
+#            if forward_mode == TEXTDET_MASK:
+#                return mask
+#            else:
+#                return mask, [f80, f40, u40]
+#
+#    def init_weight(self, init_func):
+#        self.apply(init_func)
 
-    def forward(self, x):
-        return self.conv(x)
-
-class double_conv_c3(nn.Module):
-    def __init__(self, in_ch, out_ch, stride=1, act=True):
-        super(double_conv_c3, self).__init__()
-        if stride > 1:
-            self.down = nn.AvgPool2d(2,stride=2) if stride > 1 else None
-        self.conv = C3(in_ch, out_ch, act=act)
-
-    def forward(self, x):
-        if self.down is not None:
-            x = self.down(x)
-        x = self.conv(x)
-        return x
-
-class UnetHead(nn.Module):
-    def __init__(self, act=True) -> None:
-
-        super(UnetHead, self).__init__()
-        self.down_conv1 = double_conv_c3(512, 512, 2, act=act)
-        self.upconv0 = double_conv_up_c3(0, 512, 256, act=act)
-        self.upconv2 = double_conv_up_c3(256, 512, 256, act=act)
-        self.upconv3 = double_conv_up_c3(0, 512, 256, act=act)
-        self.upconv4 = double_conv_up_c3(128, 256, 128, act=act)
-        self.upconv5 = double_conv_up_c3(64, 128, 64, act=act)
-        self.upconv6 = nn.Sequential(
-            nn.ConvTranspose2d(64, 1, kernel_size=4, stride = 2, padding=1, bias=False),
-            nn.Sigmoid()
-        )
-
-    def forward(self, f160, f80, f40, f20, f3, forward_mode=TEXTDET_MASK):
-        # input: 640@3
-        d10 = self.down_conv1(f3) # 512@10
-        u20 = self.upconv0(d10)  # 256@10
-        u40 = self.upconv2(torch.cat([f20, u20], dim = 1)) # 256@40
-
-        if forward_mode == TEXTDET_DET:
-            return f80, f40, u40
-        else:
-            u80 = self.upconv3(torch.cat([f40, u40], dim = 1)) # 256@80
-            u160 = self.upconv4(torch.cat([f80, u80], dim = 1)) # 128@160
-            u320 = self.upconv5(torch.cat([f160, u160], dim = 1)) # 64@320
-            mask = self.upconv6(u320)
-            if forward_mode == TEXTDET_MASK:
-                return mask
-            else:
-                return mask, [f80, f40, u40]
-
-    def init_weight(self, init_func):
-        self.apply(init_func)
-
-class DBHead(nn.Module):
-    def __init__(self, in_channels, k = 50, shrink_with_sigmoid=True, act=True):
-        super().__init__()
-        self.k = k
-        self.shrink_with_sigmoid = shrink_with_sigmoid
-        self.upconv3 = double_conv_up_c3(0, 512, 256, act=act)
-        self.upconv4 = double_conv_up_c3(128, 256, 128, act=act)
-        self.conv = nn.Sequential(
-            nn.Conv2d(128, in_channels, 1),
-            nn.BatchNorm2d(in_channels),
-            nn.ReLU(inplace=True)
-        )
-        self.binarize = nn.Sequential(
-            nn.Conv2d(in_channels, in_channels // 4, 3, padding=1),
-            nn.BatchNorm2d(in_channels // 4),
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(in_channels // 4, in_channels // 4, 2, 2),
-            nn.BatchNorm2d(in_channels // 4),
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(in_channels // 4, 1, 2, 2)
-            )
-        self.thresh = self._init_thresh(in_channels)
-
-    def forward(self, f80, f40, u40, shrink_with_sigmoid=True, step_eval=False):
-        shrink_with_sigmoid = self.shrink_with_sigmoid
-        u80 = self.upconv3(torch.cat([f40, u40], dim = 1)) # 256@80
-        x = self.upconv4(torch.cat([f80, u80], dim = 1)) # 128@160
-        x = self.conv(x)
-        threshold_maps = self.thresh(x)
-        x = self.binarize(x)
-        shrink_maps = torch.sigmoid(x)
-
-        if self.training:
-            binary_maps = self.step_function(shrink_maps, threshold_maps)
-            if shrink_with_sigmoid:
-                return torch.cat((shrink_maps, threshold_maps, binary_maps), dim=1)
-            else:
-                return torch.cat((shrink_maps, threshold_maps, binary_maps, x), dim=1)
-        else:
-            if step_eval:
-                return self.step_function(shrink_maps, threshold_maps)
-            else:
-                return torch.cat((shrink_maps, threshold_maps), dim=1)
-
-    def init_weight(self, init_func):
-        self.apply(init_func)
-
-    def _init_thresh(self, inner_channels, serial=False, smooth=False, bias=False):
-        in_channels = inner_channels
-        if serial:
-            in_channels += 1
-        self.thresh = nn.Sequential(
-            nn.Conv2d(in_channels, inner_channels // 4, 3, padding=1, bias=bias),
-            nn.BatchNorm2d(inner_channels // 4),
-            nn.ReLU(inplace=True),
-            self._init_upsample(inner_channels // 4, inner_channels // 4, smooth=smooth, bias=bias),
-            nn.BatchNorm2d(inner_channels // 4),
-            nn.ReLU(inplace=True),
-            self._init_upsample(inner_channels // 4, 1, smooth=smooth, bias=bias),
-            nn.Sigmoid())
-        return self.thresh
-
-    def _init_upsample(self, in_channels, out_channels, smooth=False, bias=False):
-        if smooth:
-            inter_out_channels = out_channels
-            if out_channels == 1:
-                inter_out_channels = in_channels
-            module_list = [
-                nn.Upsample(scale_factor=2, mode='nearest'),
-                nn.Conv2d(in_channels, inter_out_channels, 3, 1, 1, bias=bias)]
-            if out_channels == 1:
-                module_list.append(nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=1, bias=True))
-            return nn.Sequential(module_list)
-        else:
-            return nn.ConvTranspose2d(in_channels, out_channels, 2, 2)
-
-    def step_function(self, x, y):
-        return torch.reciprocal(1 + torch.exp(-self.k * (x - y)))
+#class DBHead(nn.Module):
+#    def __init__(self, in_channels, k = 50, shrink_with_sigmoid=True, act=True):
+#        super().__init__()
+#        self.k = k
+#        self.shrink_with_sigmoid = shrink_with_sigmoid
+#        self.upconv3 = double_conv_up_c3(0, 512, 256, act=act)
+#        self.upconv4 = double_conv_up_c3(128, 256, 128, act=act)
+#        self.conv = nn.Sequential(
+#            nn.Conv2d(128, in_channels, 1),
+#            nn.BatchNorm2d(in_channels),
+#            nn.ReLU(inplace=True)
+#        )
+#        self.binarize = nn.Sequential(
+#            nn.Conv2d(in_channels, in_channels // 4, 3, padding=1),
+#            nn.BatchNorm2d(in_channels // 4),
+#            nn.ReLU(inplace=True),
+#            nn.ConvTranspose2d(in_channels // 4, in_channels // 4, 2, 2),
+#            nn.BatchNorm2d(in_channels // 4),
+#            nn.ReLU(inplace=True),
+#            nn.ConvTranspose2d(in_channels // 4, 1, 2, 2)
+#            )
+#        self.thresh = self._init_thresh(in_channels)
+#
+#    def forward(self, f80, f40, u40, shrink_with_sigmoid=True, step_eval=False):
+#        shrink_with_sigmoid = self.shrink_with_sigmoid
+#        u80 = self.upconv3(torch.cat([f40, u40], dim = 1)) # 256@80
+#        x = self.upconv4(torch.cat([f80, u80], dim = 1)) # 128@160
+#        x = self.conv(x)
+#        threshold_maps = self.thresh(x)
+#        x = self.binarize(x)
+#        shrink_maps = torch.sigmoid(x)
+#
+#        if self.training:
+#            binary_maps = self.step_function(shrink_maps, threshold_maps)
+#            if shrink_with_sigmoid:
+#                return torch.cat((shrink_maps, threshold_maps, binary_maps), dim=1)
+#            else:
+#                return torch.cat((shrink_maps, threshold_maps, binary_maps, x), dim=1)
+#        else:
+#            if step_eval:
+#                return self.step_function(shrink_maps, threshold_maps)
+#            else:
+#                return torch.cat((shrink_maps, threshold_maps), dim=1)
+#
+#    def init_weight(self, init_func):
+#        self.apply(init_func)
+#
+#    def _init_thresh(self, inner_channels, serial=False, smooth=False, bias=False):
+#        in_channels = inner_channels
+#        if serial:
+#            in_channels += 1
+#        self.thresh = nn.Sequential(
+#            nn.Conv2d(in_channels, inner_channels // 4, 3, padding=1, bias=bias),
+#            nn.BatchNorm2d(inner_channels // 4),
+#            nn.ReLU(inplace=True),
+#            self._init_upsample(inner_channels // 4, inner_channels // 4, smooth=smooth, bias=bias),
+#            nn.BatchNorm2d(inner_channels // 4),
+#            nn.ReLU(inplace=True),
+#            self._init_upsample(inner_channels // 4, 1, smooth=smooth, bias=bias),
+#            nn.Sigmoid())
+#        return self.thresh
+#
+#    def _init_upsample(self, in_channels, out_channels, smooth=False, bias=False):
+#        if smooth:
+#            inter_out_channels = out_channels
+#            if out_channels == 1:
+#                inter_out_channels = in_channels
+#            module_list = [
+#                nn.Upsample(scale_factor=2, mode='nearest'),
+#                nn.Conv2d(in_channels, inter_out_channels, 3, 1, 1, bias=bias)]
+#            if out_channels == 1:
+#                module_list.append(nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=1, bias=True))
+#            return nn.Sequential(module_list)
+#        else:
+#            return nn.ConvTranspose2d(in_channels, out_channels, 2, 2)
+#
+#    def step_function(self, x, y):
+#        return torch.reciprocal(1 + torch.exp(-self.k * (x - y)))
 
 #class TextDetector(nn.Module):
 #    def __init__(self, weights, map_location='cpu', forward_mode=TEXTDET_MASK, act=True):
