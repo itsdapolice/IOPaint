@@ -3,7 +3,6 @@ import copy
 import torch
 import torch.nn as nn
 
-from .utils.yolov5_utils import fuse_conv_and_bn
 from .utils.weight_init import init_weights
 from .yolov5.yolo import load_yolov5_ckpt
 from .yolov5.common import C3, Conv
@@ -217,19 +216,6 @@ class TextDetBase(nn.Module):
     def __init__(self, model_path, device='cpu', half=False, fuse=False, act='leaky'):
         super(TextDetBase, self).__init__()
         self.blk_det, self.text_seg, self.text_det = get_base_det_models(model_path, device, half, act=act)
-        if fuse:
-            self.fuse()
-
-    def fuse(self):
-        def _fuse(model):
-            for m in model.modules():
-                if isinstance(m, (Conv)) and hasattr(m, 'bn'):
-                    m.conv = fuse_conv_and_bn(m.conv, m.bn)  # update conv
-                    delattr(m, 'bn')  # remove batchnorm
-                    m.forward = m.forward_fuse  # update forward
-            return model
-        self.text_seg = _fuse(self.text_seg)
-        self.text_det = _fuse(self.text_det)
 
     def forward(self, features):
         blks, features = self.blk_det(features, detect=True)
