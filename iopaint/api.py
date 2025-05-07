@@ -381,6 +381,7 @@ class Api:
             self.config.enable_restoreformer,
             self.config.restoreformer_device,
             self.config.no_half,
+            self.config.enable_mangatextmask,
         )
 
     def _build_model_manager(self):

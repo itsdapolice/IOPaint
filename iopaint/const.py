@@ -112,9 +112,11 @@ INTERACTIVE_SEG_HELP = "Enable interactive segmentation using Segment Anything."
 INTERACTIVE_SEG_MODEL_HELP = "Model size: mobile_sam < vit_b < vit_l < vit_h. Bigger model size means better segmentation but slower speed."
 REMOVE_BG_HELP = "Enable remove background plugin. Always run on CPU"
 ANIMESEG_HELP = "Enable anime segmentation plugin. Always run on CPU"
+MANGATEXTMASK_HELP = "Enable Manga Text Mask plugin. Always run on CPU"
 REALESRGAN_HELP = "Enable realesrgan super resolution"
 GFPGAN_HELP = "Enable GFPGAN face restore. To also enhance background, use with --enable-realesrgan"
 RESTOREFORMER_HELP = "Enable RestoreFormer face restore. To also enhance background, use with --enable-realesrgan"
 GIF_HELP = "Enable GIF plugin. Make GIF to compare original and cleaned image"
+
 
 INBROWSER_HELP = "Automatically launch IOPaint in a new tab on the default browser"

@@ -3,6 +3,7 @@ from typing import Dict
 from loguru import logger
 
 from .anime_seg import AnimeSeg
+from .MangaTextMask import MangaTextMask
 from .gfpgan_plugin import GFPGANPlugin
 from .interactive_seg import InteractiveSeg
 from .realesrgan import RealESRGANUpscaler
@@ -26,6 +27,7 @@ def build_plugins(
     enable_restoreformer: bool,
     restoreformer_device: Device,
     no_half: bool,
+    enable_mangatextmask: bool,
 ) -> Dict:
     plugins = {}
     if enable_interactive_seg:
@@ -37,6 +39,10 @@ def build_plugins(
     if enable_remove_bg:
         logger.info(f"Initialize {RemoveBG.name} plugin")
         plugins[RemoveBG.name] = RemoveBG(remove_bg_model)
+
+    if enable_mangatextmask:
+        logger.info(f"Initialize {MangaTextMask.name} plugin")
+        plugins[MangaTextMask.name] = MangaTextMask()
 
     if enable_anime_seg:
         logger.info(f"Initialize {AnimeSeg.name} plugin")

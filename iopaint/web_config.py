@@ -52,6 +52,7 @@ default_configs = dict(
     gfpgan_device=Device.cpu,
     enable_restoreformer=False,
     restoreformer_device=Device.cpu,
+    enable_mangatextmask=False
 )
 
 

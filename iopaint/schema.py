@@ -244,6 +244,7 @@ class ApiConfig(BaseModel):
     gfpgan_device: Device
     enable_restoreformer: bool
     restoreformer_device: Device
+    enable_mangatextmask: bool
 
 
 class InpaintRequest(BaseModel):
@@ -482,11 +483,11 @@ class Config(BaseModel):
     zits_wireframe: bool = True
 
     # Configs for High Resolution Strategy(different way to preprocess image)
-    hd_strategy: str  = HDStrategy.ORIGINAL # See HDStrategy Enum
+    hd_strategy: str  = HDStrategy.CROP # See HDStrategy Enum
     hd_strategy_crop_margin: int = 512
     # If the longer side of the image is larger than this value, use crop strategy
-    hd_strategy_crop_trigger_size: int = 512
-    hd_strategy_resize_limit: int = 512
+    hd_strategy_crop_trigger_size: int = 256
+    hd_strategy_resize_limit: int = 256
 
     # # Configs for Stable Diffusion 1.5
     # prompt: str = ""
