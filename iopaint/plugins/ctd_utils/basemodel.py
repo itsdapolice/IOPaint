@@ -3,7 +3,7 @@ import copy
 import torch
 import torch.nn as nn
 
-from .utils.weight_init import init_weights
+#from .utils.weight_init import init_weights
 from .yolov5.yolo import load_yolov5_ckpt
 from .yolov5.common import C3, Conv
 
@@ -152,54 +152,54 @@ class DBHead(nn.Module):
     def step_function(self, x, y):
         return torch.reciprocal(1 + torch.exp(-self.k * (x - y)))
 
-class TextDetector(nn.Module):
-    def __init__(self, weights, map_location='cpu', forward_mode=TEXTDET_MASK, act=True):
-        super(TextDetector, self).__init__()
-
-        yolov5s_backbone = load_yolov5_ckpt(weights=weights, map_location=map_location)
-        yolov5s_backbone.eval()
-        out_indices = [1, 3, 5, 7, 9]
-        yolov5s_backbone.out_indices = out_indices
-        yolov5s_backbone.model = yolov5s_backbone.model[:max(out_indices)+1]
-        self.act = act
-        self.seg_net = UnetHead(act=act)
-        self.backbone = yolov5s_backbone
-        self.dbnet = None
-        self.forward_mode = forward_mode
-
-    def train_mask(self):
-        self.forward_mode = TEXTDET_MASK
-        self.backbone.eval()
-        self.seg_net.train()
-
-    def initialize_db(self, unet_weights):
-        self.dbnet = DBHead(64, act=self.act)
-        self.seg_net.load_state_dict(torch.load(unet_weights, map_location='cpu')['weights'])
-        self.dbnet.init_weight(init_weights)
-        self.dbnet.upconv3 = copy.deepcopy(self.seg_net.upconv3)
-        self.dbnet.upconv4 = copy.deepcopy(self.seg_net.upconv4)
-        del self.seg_net.upconv3
-        del self.seg_net.upconv4
-        del self.seg_net.upconv5
-        del self.seg_net.upconv6
-        # del self.seg_net.conv_mask
-
-    def train_db(self):
-        self.forward_mode = TEXTDET_DET
-        self.backbone.eval()
-        self.seg_net.eval()
-        self.dbnet.train()
-
-    def forward(self, x):
-        forward_mode = self.forward_mode
-        with torch.no_grad():
-            outs = self.backbone(x)
-        if forward_mode == TEXTDET_MASK:
-            return self.seg_net(*outs, forward_mode=forward_mode)
-        elif forward_mode == TEXTDET_DET:
-            with torch.no_grad():
-                outs = self.seg_net(*outs, forward_mode=forward_mode)
-            return self.dbnet(*outs)
+#class TextDetector(nn.Module):
+#    def __init__(self, weights, map_location='cpu', forward_mode=TEXTDET_MASK, act=True):
+#        super(TextDetector, self).__init__()
+#
+#        yolov5s_backbone = load_yolov5_ckpt(weights=weights, map_location=map_location)
+#        yolov5s_backbone.eval()
+#        out_indices = [1, 3, 5, 7, 9]
+#        yolov5s_backbone.out_indices = out_indices
+#        yolov5s_backbone.model = yolov5s_backbone.model[:max(out_indices)+1]
+#        self.act = act
+#        self.seg_net = UnetHead(act=act)
+#        self.backbone = yolov5s_backbone
+#        self.dbnet = None
+#        self.forward_mode = forward_mode
+#
+#    def train_mask(self):
+#        self.forward_mode = TEXTDET_MASK
+#        self.backbone.eval()
+#        self.seg_net.train()
+#
+#    def initialize_db(self, unet_weights):
+#        self.dbnet = DBHead(64, act=self.act)
+#        self.seg_net.load_state_dict(torch.load(unet_weights, map_location='cpu')['weights'])
+#        self.dbnet.init_weight(init_weights)
+#        self.dbnet.upconv3 = copy.deepcopy(self.seg_net.upconv3)
+#        self.dbnet.upconv4 = copy.deepcopy(self.seg_net.upconv4)
+#        del self.seg_net.upconv3
+#        del self.seg_net.upconv4
+#        del self.seg_net.upconv5
+#        del self.seg_net.upconv6
+#        # del self.seg_net.conv_mask
+#
+#    def train_db(self):
+#        self.forward_mode = TEXTDET_DET
+#        self.backbone.eval()
+#        self.seg_net.eval()
+#        self.dbnet.train()
+#
+#    def forward(self, x):
+#        forward_mode = self.forward_mode
+#        with torch.no_grad():
+#            outs = self.backbone(x)
+#        if forward_mode == TEXTDET_MASK:
+#            return self.seg_net(*outs, forward_mode=forward_mode)
+#        elif forward_mode == TEXTDET_DET:
+#            with torch.no_grad():
+#                outs = self.seg_net(*outs, forward_mode=forward_mode)
+#            return self.dbnet(*outs)
 
 def get_base_det_models(model_path, device='cpu', half=False, act='leaky'):
     textdetector_dict = torch.load(model_path, map_location=device)
