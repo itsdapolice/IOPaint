@@ -14,4 +14,4 @@ RUN pip install git+https://github.com/itsdapolice/iopaint
 
 EXPOSE 8080
 
-ENTRYPOINT ["iopaint","start","--model=lama_manga","--device=cpu","--port=8080","--host=0.0.0.0","--enable-interactive-seg","--interactive-seg-device","cpu","--quality=100","--enable-remove-bg","--enable-anime-seg"]
+ENTRYPOINT ["iopaint","start","--model=lama_manga","--device=cpu","--port=8080","--host=0.0.0.0","--enable-interactive-seg","--interactive-seg-device","cpu","--quality=100","--enable-remove-bg","--enable-anime-seg","--enable-mangatextmask"]
