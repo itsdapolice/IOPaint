@@ -16,11 +16,12 @@ from typing import Union, Tuple
 import cv2
 import torch
 
-from .ctd_utils.basemodel import TextDetBase, TextDetBaseDNN
+#from .ctd_utils.basemodel import TextDetBase, TextDetBaseDNN
+from .ctd_utils.basemodel import TextDetBaseDNN
 from .ctd_utils.utils.yolov5_utils import non_max_suppression
 from .ctd_utils.utils.db_utils import SegDetectorRepresenter
 from .ctd_utils.utils.imgproc_utils import letterbox
-from .ctd_utils.textmask import REFINEMASK_INPAINT, refine_mask
+#from .ctd_utils.textmask import REFINEMASK_INPAINT, refine_mask
 from .ctd_utils.baseutils.generic import det_rearrange_forward, Quadrilateral
 from .common import OfflineDetector
 
@@ -75,20 +76,20 @@ class MangaTextMask(BasePlugin):
 
     def __init__(self):
         super().__init__()
-        url_or_path = 'https://github.com/zyddnys/manga-image-translator/releases/download/beta-0.3/comictextdetector.pt'
+        url_or_path = 'https://github.com/zyddnys/manga-image-translator/releases/download/beta-0.3/comictextdetector.pt.onnx'
         if os.path.exists(url_or_path):
             model_path = url_or_path
         else:
             model_path = download_model(url_or_path)
         self.device="cpu"
-        self.model = TextDetBase(model_path, device="cpu", act='leaky')
-        self.model.to("cpu")
-        self.backend = 'torch'
+#        self.model = TextDetBase(model_path, device="cpu", act='leaky')
+#        self.model.to("cpu")
+#        self.backend = 'torch'
         input_size = 1024
+        self.model = cv2.dnn.readNetFromONNX(model_path)
+        self.model = TextDetBaseDNN(input_size, model_path)
+        self.backend = 'opencv'
         input_size = (input_size, input_size)
-#        self.model = cv2.dnn.readNetFromONNX(model_path)
-#        self.model = TextDetBaseDNN(input_size, model_path)
-#        self.backend = 'opencv'
         self.input_size = input_size
         self.half = False
         self.conf_thresh = 0.4
@@ -99,28 +100,6 @@ class MangaTextMask(BasePlugin):
     def gen_mask(self, rgb_np_img, req: RunPluginRequest) -> np.ndarray:
 
         return self._infer(rgb_np_img,1536,0.5,0.7,2.3)
-
-    def det_batch_forward_ctd(self, batch: np.ndarray, device: str) -> Tuple[np.ndarray, np.ndarray]:
-        if isinstance(self.model, TextDetBase):
-            batch = einops.rearrange(batch.astype(np.float32) / 255., 'n h w c -> n c h w')
-            batch = torch.from_numpy(batch).to(device)
-            _, mask, lines = self.model(batch)
-            mask = mask.detach().cpu().numpy()
-            lines = lines.detach().cpu().numpy()
-        elif isinstance(self.model, TextDetBaseDNN):
-            mask_lst, line_lst = [], []
-            for b in batch:
-                _, mask, lines = self.model(b)
-                if mask.shape[1] == 2:     # some version of opencv spit out reversed result
-                    tmp = mask
-                    mask = lines
-                    lines = tmp
-                mask_lst.append(mask)
-                line_lst.append(lines)
-            lines, mask = np.concatenate(line_lst, 0), np.concatenate(mask_lst, 0)
-        else:
-            raise NotImplementedError
-        return lines, mask
 
     def det_batch_forward_ctd(self, batch: np.ndarray, device: str) -> Tuple[np.ndarray, np.ndarray]:
         if isinstance(self.model, TextDetBase):
@@ -200,8 +179,8 @@ class MangaTextMask(BasePlugin):
         # Doing it for increasing the textline merge accuracy doesn't really work either,
         # as the merge could be postponed until after the OCR finishes.
 
-        textlines = [Quadrilateral(pts.astype(int), '', score) for pts, score in zip(lines, scores)]
-        mask_refined = refine_mask(image, mask, textlines, refine_mode=None)
+        #textlines = [Quadrilateral(pts.astype(int), '', score) for pts, score in zip(lines, scores)]
+        #mask_refined = refine_mask(image, mask, textlines, refine_mode=None)
 
         #return textlines, mask_refined, None
         kernel = np.ones((3, 3), np.uint8) 
