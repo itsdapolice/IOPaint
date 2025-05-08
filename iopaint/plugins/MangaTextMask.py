@@ -21,7 +21,7 @@ from .ctd_utils.basemodel import TextDetBaseDNN
 from .ctd_utils.utils.yolov5_utils import non_max_suppression
 from .ctd_utils.utils.db_utils import SegDetectorRepresenter
 from .ctd_utils.utils.imgproc_utils import letterbox
-from .ctd_utils.textmask import REFINEMASK_INPAINT, refine_mask
+#from .ctd_utils.textmask import REFINEMASK_INPAINT, refine_mask
 from .ctd_utils.baseutils.generic import det_rearrange_forward, Quadrilateral
 from .common import OfflineDetector
 
@@ -179,8 +179,8 @@ class MangaTextMask(BasePlugin):
         # Doing it for increasing the textline merge accuracy doesn't really work either,
         # as the merge could be postponed until after the OCR finishes.
 
-        textlines = [Quadrilateral(pts.astype(int), '', score) for pts, score in zip(lines, scores)]
-        mask_refined = refine_mask(image, mask, textlines, refine_mode=None)
+        #textlines = [Quadrilateral(pts.astype(int), '', score) for pts, score in zip(lines, scores)]
+        #mask_refined = refine_mask(image, mask, textlines, refine_mode=None)
 
         #return textlines, mask_refined, None
         kernel = np.ones((3, 3), np.uint8) 
